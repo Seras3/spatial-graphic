@@ -1,0 +1,7 @@
+﻿  05_02_animatie.cpp
+E:\FMI-UniBuc\3rd\Grafica\Proiecte\spatial-graphic\Project-1\05_02_animatie.cpp(42,19): warning C4305: 'initializing': truncation from 'double' to 'float'
+E:\FMI-UniBuc\3rd\Grafica\Proiecte\spatial-graphic\Project-1\05_02_animatie.cpp(45,34): warning C4305: 'initializing': truncation from 'double' to 'float'
+  loadShaders.cpp
+E:\FMI-UniBuc\3rd\Grafica\Proiecte\spatial-graphic\Project-1\loadShaders.cpp(47,9): warning C4101: 'InfoLogLength': unreferenced local variable
+  Generating Code...
+  Project-1.vcxproj -> E:\FMI-UniBuc\3rd\Grafica\Proiecte\spatial-graphic\x64\Debug\Project-1.exe

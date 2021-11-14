@@ -20,15 +20,15 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="05_02_animatie.cpp">
+    <ClCompile Include="loadShaders.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="loadShaders.cpp">
+    <ClCompile Include="SolarSystemAnimation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="05_02_Shader.frag" />
-    <None Include="05_02_Shader.vert" />
+    <None Include="SolarSystemShader.frag" />
+    <None Include="SolarSystemShader.vert" />
   </ItemGroup>
 </Project>

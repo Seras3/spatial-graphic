@@ -26,11 +26,12 @@ ColorBufferId,
 ProgramId,
 myMatrixLocation;
 
-
+const int PlayerVCount = 4;
 const int N = 360;
 const int R = 50;
 const float PI = 3.141516;
-glm::mat4 myMatrix, resizeMatrix, scaleMatrix, translMatrix, rotateMatrix;
+glm::mat4 myMatrix, resizeMatrix, scaleMatrix, translMatrix, rotateMatrix, 
+translPlayerMatrix, rotatePlayerMatrix, rotateVerticalPlayerMatrix;
 
 float i = 0.0;
 float angle = 0.0;
@@ -52,33 +53,28 @@ vector<GLfloat> getCirclePoints(float r, int numberOfPoints)
 	return circlePoints;
 }
 
-void rotatePlanetsAroundSun(int n)
-{
-	angle = angle + 0.1;
-	glutPostRedisplay();
-	glutTimerFunc(100, rotatePlanetsAroundSun, 0);
-}
-
-void mouse(int button, int state, int x, int y)
-{
-	switch (button) {
-	case GLUT_RIGHT_BUTTON:
-		if (state == GLUT_DOWN)
-			glutTimerFunc(100, rotatePlanetsAroundSun, 0);
-		break;
-	default:
-		break;
-	}
-}
-
 
 void CreateVBO(void)
 {
-	static const vector<GLfloat> Vertices = getCirclePoints(R, N);
+	static vector<GLfloat> Vertices = {
+		-25.f, -25.0f, 0.0f, 1.0f,
+		 25.f, -25.0f, 0.0f, 1.0f,
+		 25.f, 25.0f, 0.0f, 1.0f,
+		-25.f, 25.0f, 0.0f, 1.0f,
+	};
+	
+	vector<GLfloat> circleVertices = getCirclePoints(R, N);
+	Vertices.insert(Vertices.end(), circleVertices.begin(), circleVertices.end());
+	
 
 	static const GLfloat Colors[] =
 	{
-		1.0f, 1.0f, 0.0f, 1.0f
+		1.0f, 0.0f, 0.0f, 1.0f,
+		0.0f, 1.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f, 1.0f,
+		1.0f, 0.0f, 0.0f, 1.0f,
+
+		1.0f, 1.0f, 0.0f, 1.0f,
 	};
 
 	glGenBuffers(1, &VboId);
@@ -125,45 +121,10 @@ void Initialize(void)
 {
 	glClearColor(0.0f, 0.0f, 0.8f, 0.0f);
 	CreateShaders();
-	resizeMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.f / 600, 1.f / 300, 1.0));
-}
 
-
-
-
-void drawOrbit(int p) {
-	scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(2.f * p, 2.f * p, 1.0));
-	myMatrix = resizeMatrix * scaleMatrix;
-	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
-	glDrawArrays(GL_LINE_LOOP, 0, N);
-}
-
-
-void drawPlanet(int p, float scaleRaport) {
-	scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(scaleRaport, scaleRaport, 1.0));
-	translMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(2 * p * R, 0.0, 0.0));
-	myMatrix = resizeMatrix * rotateMatrix* translMatrix * scaleMatrix;
-	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
-	glDrawArrays(GL_TRIANGLE_FAN, 0, N);
-}
-
-void RenderFunction(void)
-{
-	glClear(GL_COLOR_BUFFER_BIT);
-	CreateVBO();
 	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
-	myMatrix = resizeMatrix;
-	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
-	glDrawArrays(GL_TRIANGLE_FAN, 0, N);
-
+	resizeMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.f / 600, 1.f / 300, 1.0));
 	
-	for (int p = 1; p <= 8; p++) {
-		drawOrbit(p);
-		rotateMatrix = glm::rotate(glm::mat4(1.0f), angle/p, glm::vec3(0.0, 0.0, 1.0));
-		drawPlanet(p, planetScaleRaport[p - 1]);
-	}
-
-	glFlush();
 }
 
 void Cleanup(void)
@@ -171,6 +132,122 @@ void Cleanup(void)
 	DestroyShaders();
 	DestroyVBO();
 }
+
+void setMyMatrix(glm::mat4 matrix)
+{
+	myMatrix = matrix;
+	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
+}
+
+void debugMatrix(glm::mat4 matrix) 
+{
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			cout << matrix[i][j] << " ";
+		}
+		cout << endl;
+	}
+	cout << endl;
+}
+
+
+void rotatePlanetsAroundSun(int n)
+{
+	angle = angle + 0.1;
+	glutPostRedisplay();
+	glutTimerFunc(100, rotatePlanetsAroundSun, 0);
+}
+
+void mouse(int button, int state, int x, int y)
+{
+	switch (button) {
+	case GLUT_RIGHT_BUTTON:
+		if (state == GLUT_DOWN)
+			glutTimerFunc(100, rotatePlanetsAroundSun, 0);
+		break;
+	default:
+		break;
+	}
+}
+
+
+void processNormalKeys(unsigned char key, int x, int y) {
+
+	switch (key) {
+	case ' ':
+		cout << "Space" << endl;
+		break;
+	default:
+		break;
+	}
+}
+
+void processSpecialKeys(int key, int x, int y) {
+
+	switch (key) {
+	case GLUT_KEY_LEFT:
+		cout << "Stanga" << endl;
+		break;
+	case GLUT_KEY_RIGHT:
+		cout << "Dreapta" << endl;
+		break;
+	case GLUT_KEY_UP:
+		cout << "Sus" << endl;
+		break;
+	case GLUT_KEY_DOWN:
+		cout << "Jos" << endl;
+		break;
+	default:
+		break;
+	}
+}
+
+
+
+void drawOrbit(int p) {
+	scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(2.f * p, 2.f * p, 1.0));
+	setMyMatrix(resizeMatrix * scaleMatrix);
+	glDrawArrays(GL_LINE_LOOP, PlayerVCount, N);
+}
+
+void drawPlanet(int p, float scaleRaport) {
+	scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(scaleRaport, scaleRaport, 1.0));
+	translMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(2 * p * R, 0.0, 0.0));
+	if (p == 3) {
+		translPlayerMatrix = translMatrix;
+	}
+	setMyMatrix(resizeMatrix * rotateMatrix * translMatrix * scaleMatrix);
+	glDrawArrays(GL_TRIANGLE_FAN, PlayerVCount, N);
+}
+
+void RenderFunction(void)
+{
+	glClear(GL_COLOR_BUFFER_BIT);
+	CreateVBO();
+	
+
+	setMyMatrix(resizeMatrix);
+	glDrawArrays(GL_TRIANGLE_FAN, PlayerVCount, N);
+
+	
+	
+	for (int p = 1; p <= 8; p++) {
+		drawOrbit(p);
+		rotateMatrix = glm::rotate(glm::mat4(1.0f), angle/p, glm::vec3(0.0, 0.0, 1.0));
+		if (p == 3) {
+			rotateVerticalPlayerMatrix = glm::rotate(glm::mat4(1.0f), -angle / p, glm::vec3(0.0, 0.0, 1.0));
+			rotatePlayerMatrix = rotateMatrix;
+		}
+		drawPlanet(p, planetScaleRaport[p - 1]);
+	}
+
+	setMyMatrix(resizeMatrix * rotatePlayerMatrix * translPlayerMatrix * rotateVerticalPlayerMatrix);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, PlayerVCount);
+
+	glFlush();
+}
+
+
 
 int main(int argc, char* argv[])
 {
@@ -183,6 +260,8 @@ int main(int argc, char* argv[])
 	Initialize();
 	glutDisplayFunc(RenderFunction);
 	glutMouseFunc(mouse);
+	glutKeyboardFunc(processNormalKeys);
+	glutSpecialFunc(processSpecialKeys);
 	glutCloseFunc(Cleanup);
 	glutMainLoop();
 }

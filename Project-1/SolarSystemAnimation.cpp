@@ -33,7 +33,7 @@ const int N = 360;
 const int R = 50;
 const float PI = 3.141516;
 glm::mat4 myMatrix, resizeMatrix, scaleMatrix, translMatrix, rotateMatrix, 
-translPlayerMatrix, rotatePlayerMatrix, rotateVerticalPlayerMatrix;
+translPlayerMatrix, rotatePlayerMatrix, rotateVerticalPlayerMatrix, launchPlayerMatrix;
 
 glm::mat4 view, projection;
 
@@ -195,7 +195,7 @@ void setMyMatrix(glm::mat4 matrix)
 
 void rotatePlanetsAroundSun(int n)
 {
-	angle = angle + 0.02;
+	angle = angle + 0.1;
 	glutPostRedisplay();
 	glutTimerFunc(50, rotatePlanetsAroundSun, 0);
 }
@@ -231,16 +231,20 @@ void processSpecialKeys(int key, int x, int y) {
 
 	switch (key) {
 	case GLUT_KEY_LEFT:
-		cout << "Stanga" << endl;
+		Obsx -= 10;
+		launchPlayerMatrix = glm::translate(launchPlayerMatrix, glm::vec3(-10, 0, 0));
 		break;
 	case GLUT_KEY_RIGHT:
-		cout << "Dreapta" << endl;
+		Obsx += 10;
+		launchPlayerMatrix = glm::translate(launchPlayerMatrix, glm::vec3(10, 0, 0));
 		break;
 	case GLUT_KEY_UP:
-		cout << "Sus" << endl;
+		Obsy += 10;
+		launchPlayerMatrix = glm::translate(launchPlayerMatrix, glm::vec3(0, 10, 0));
 		break;
 	case GLUT_KEY_DOWN:
-		cout << "Jos" << endl;
+		Obsy -= 10;
+		launchPlayerMatrix = glm::translate(launchPlayerMatrix, glm::vec3(0, -10, 0));
 		break;
 	default:
 		break;
@@ -259,8 +263,8 @@ void drawPlanet(int p, float scaleRaport) {
 	scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(scaleRaport, scaleRaport, 1.0));
 	translMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(2 * p * R, 0.0, 0.0));
 	if (p == 3) {
-		translPlayerMatrix = translMatrix;
 		if (!PLAYER_LAUNCHED) {
+			translPlayerMatrix = translMatrix;
 			Obsx = (rotateMatrix * translMatrix)[3][0];
 			Obsy = (rotateMatrix * translMatrix)[3][1];
 		}
@@ -303,14 +307,17 @@ void RenderFunction(void)
 		if (p == 3 && PLAYER_SHOULD_INIT_MATRIX) {
 			rotateVerticalPlayerMatrix = glm::rotate(glm::mat4(1.0f), -angle / p, glm::vec3(0.0, 0.0, 1.0));
 			rotatePlayerMatrix = rotateMatrix;
-			PLAYER_SHOULD_INIT_MATRIX = false;
 		}
 		drawPlanet(p, planetScaleRaport[p - 1]);
 	}
 
 	if (PLAYER_LAUNCHED)
 	{
-		setMyMatrix(rotatePlayerMatrix * translPlayerMatrix * rotateVerticalPlayerMatrix);
+		if (PLAYER_SHOULD_INIT_MATRIX) {
+			launchPlayerMatrix = rotatePlayerMatrix * translPlayerMatrix * rotateVerticalPlayerMatrix;
+			PLAYER_SHOULD_INIT_MATRIX = false;
+		}
+		setMyMatrix(launchPlayerMatrix);
 		glDrawArrays(GL_TRIANGLE_FAN, 0, PlayerVCount);
 	}
 	

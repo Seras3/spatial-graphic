@@ -12,6 +12,7 @@
 #include "glm/glm/gtc/matrix_transform.hpp"
 #include "glm/glm/gtx/transform.hpp"
 #include "glm/glm/gtc/type_ptr.hpp"
+#include "SOIL.h"
 
 #include <vector>
 using namespace std;
@@ -24,7 +25,8 @@ VboId,
 EboId,
 ColorBufferId,
 ProgramId,
-myMatrixLocation;
+myMatrixLocation,
+texture;
 
 const int PlayerVCount = 4;
 const int N = 360;
@@ -32,6 +34,16 @@ const int R = 50;
 const float PI = 3.141516;
 glm::mat4 myMatrix, resizeMatrix, scaleMatrix, translMatrix, rotateMatrix, 
 translPlayerMatrix, rotatePlayerMatrix, rotateVerticalPlayerMatrix;
+
+glm::mat4 view, projection;
+
+float Obsx = 0.0f, Obsy = 0.0f, Obsz = 800.f;
+float Refx = 0.0f, Refy = 0.0f;
+float width = 1200, height = 600, fov = 90, znear = 1, zfar = 1000;
+
+
+bool PLAYER_LAUNCHED = false;
+bool PLAYER_SHOULD_INIT_MATRIX = false;
 
 float i = 0.0;
 float angle = 0.0;
@@ -53,6 +65,16 @@ vector<GLfloat> getCirclePoints(float r, int numberOfPoints)
 	return circlePoints;
 }
 
+void debugMatrix(glm::mat4 matrix)
+{
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			cout << matrix[i][j] << " ";
+		}
+		cout << endl;
+	}
+	cout << endl;
+}
 
 void CreateVBO(void)
 {
@@ -106,6 +128,27 @@ void DestroyVBO(void)
 	glDeleteVertexArrays(1, &VaoId);
 }
 
+void LoadTexture(void)
+{
+	
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	int width, height;
+	unsigned char* image = SOIL_load_image("rocket.png", &width, &height, 0, SOIL_LOAD_RGB);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	SOIL_free_image_data(image);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+}
+
 void CreateShaders(void)
 {
 	ProgramId = LoadShaders("SolarSystemShader.vert", "SolarSystemShader.frag");
@@ -121,10 +164,18 @@ void Initialize(void)
 {
 	glClearColor(0.0f, 0.0f, 0.8f, 0.0f);
 	CreateShaders();
+	LoadTexture();
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
+
+	Obsx = 0;
+	Obsy = 0;
+	Obsz = 200.f;
 
 	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
-	resizeMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.f / 600, 1.f / 300, 1.0));
-	
+	resizeMatrix = glm::mat4(1.0f);
 }
 
 void Cleanup(void)
@@ -139,23 +190,14 @@ void setMyMatrix(glm::mat4 matrix)
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 }
 
-void debugMatrix(glm::mat4 matrix) 
-{
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < 4; j++) {
-			cout << matrix[i][j] << " ";
-		}
-		cout << endl;
-	}
-	cout << endl;
-}
+
 
 
 void rotatePlanetsAroundSun(int n)
 {
-	angle = angle + 0.1;
+	angle = angle + 0.02;
 	glutPostRedisplay();
-	glutTimerFunc(100, rotatePlanetsAroundSun, 0);
+	glutTimerFunc(50, rotatePlanetsAroundSun, 0);
 }
 
 void mouse(int button, int state, int x, int y)
@@ -175,7 +217,10 @@ void processNormalKeys(unsigned char key, int x, int y) {
 
 	switch (key) {
 	case ' ':
-		cout << "Space" << endl;
+		if (!PLAYER_LAUNCHED) {
+			PLAYER_LAUNCHED = true;
+			PLAYER_SHOULD_INIT_MATRIX = true;
+		}
 		break;
 	default:
 		break;
@@ -206,7 +251,7 @@ void processSpecialKeys(int key, int x, int y) {
 
 void drawOrbit(int p) {
 	scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(2.f * p, 2.f * p, 1.0));
-	setMyMatrix(resizeMatrix * scaleMatrix);
+	setMyMatrix(scaleMatrix);
 	glDrawArrays(GL_LINE_LOOP, PlayerVCount, N);
 }
 
@@ -215,8 +260,12 @@ void drawPlanet(int p, float scaleRaport) {
 	translMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(2 * p * R, 0.0, 0.0));
 	if (p == 3) {
 		translPlayerMatrix = translMatrix;
+		if (!PLAYER_LAUNCHED) {
+			Obsx = (rotateMatrix * translMatrix)[3][0];
+			Obsy = (rotateMatrix * translMatrix)[3][1];
+		}
 	}
-	setMyMatrix(resizeMatrix * rotateMatrix * translMatrix * scaleMatrix);
+	setMyMatrix(rotateMatrix * translMatrix * scaleMatrix);
 	glDrawArrays(GL_TRIANGLE_FAN, PlayerVCount, N);
 }
 
@@ -224,7 +273,24 @@ void RenderFunction(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT);
 	CreateVBO();
+
+	// se schimba pozitia observatorului
+	glm::vec3 Obs = glm::vec3(Obsx, Obsy, Obsz);
+
+	// pozitia punctului de referinta
+	Refx = Obsx; Refy = Obsy;
+	glm::vec3 PctRef = glm::vec3(Refx, Refy, -1.0f);
+
+	// verticala din planul de vizualizare 
+	glm::vec3 Vert = glm::vec3(0.0f, 1.0f, 0.0f);
 	
+	
+	view = glm::lookAt(Obs, PctRef, Vert);
+	glUniformMatrix4fv(glGetUniformLocation(ProgramId, "view"), 1, GL_FALSE, &view[0][0]);
+	
+	projection = glm::perspective(fov, GLfloat(width) / GLfloat(height), znear, zfar);
+	glUniformMatrix4fv(glGetUniformLocation(ProgramId, "projection"), 1, GL_FALSE, &projection[0][0]);
+
 
 	setMyMatrix(resizeMatrix);
 	glDrawArrays(GL_TRIANGLE_FAN, PlayerVCount, N);
@@ -234,15 +300,20 @@ void RenderFunction(void)
 	for (int p = 1; p <= 8; p++) {
 		drawOrbit(p);
 		rotateMatrix = glm::rotate(glm::mat4(1.0f), angle/p, glm::vec3(0.0, 0.0, 1.0));
-		if (p == 3) {
+		if (p == 3 && PLAYER_SHOULD_INIT_MATRIX) {
 			rotateVerticalPlayerMatrix = glm::rotate(glm::mat4(1.0f), -angle / p, glm::vec3(0.0, 0.0, 1.0));
 			rotatePlayerMatrix = rotateMatrix;
+			PLAYER_SHOULD_INIT_MATRIX = false;
 		}
 		drawPlanet(p, planetScaleRaport[p - 1]);
 	}
 
-	setMyMatrix(resizeMatrix * rotatePlayerMatrix * translPlayerMatrix * rotateVerticalPlayerMatrix);
-	glDrawArrays(GL_TRIANGLE_FAN, 0, PlayerVCount);
+	if (PLAYER_LAUNCHED)
+	{
+		setMyMatrix(rotatePlayerMatrix * translPlayerMatrix * rotateVerticalPlayerMatrix);
+		glDrawArrays(GL_TRIANGLE_FAN, 0, PlayerVCount);
+	}
+	
 
 	glFlush();
 }
@@ -254,7 +325,7 @@ int main(int argc, char* argv[])
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
 	glutInitWindowPosition(0, 0);
-	glutInitWindowSize(1200, 600);
+	glutInitWindowSize(width, height);
 	glutCreateWindow("Solar System");
 	glewInit();
 	Initialize();

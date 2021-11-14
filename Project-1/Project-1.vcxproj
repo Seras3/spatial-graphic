@@ -19,15 +19,24 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="imageloader.h" />
     <ClInclude Include="loadShaders.h" />
+    <ClInclude Include="SOIL.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="imageloader.cpp" />
     <ClCompile Include="loadShaders.cpp" />
     <ClCompile Include="SolarSystemAnimation.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="SolarSystemShader.frag" />
     <None Include="SolarSystemShader.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="rocket.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="SOIL.lib" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

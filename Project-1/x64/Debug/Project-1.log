@@ -1,7 +1,7 @@
 ﻿  SolarSystemAnimation.cpp
-E:\FMI-UniBuc\3rd\Grafica\Proiecte\spatial-graphic\Project-1\SolarSystemAnimation.cpp(34,26): warning C4305: 'initializing': truncation from 'double' to 'float'
-E:\FMI-UniBuc\3rd\Grafica\Proiecte\spatial-graphic\Project-1\SolarSystemAnimation.cpp(51,76): warning C4305: 'initializing': truncation from 'double' to 'float'
-E:\FMI-UniBuc\3rd\Grafica\Proiecte\spatial-graphic\Project-1\SolarSystemAnimation.cpp(198,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-E:\FMI-UniBuc\3rd\Grafica\Proiecte\spatial-graphic\Project-1\SolarSystemAnimation.cpp(335,28): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-E:\FMI-UniBuc\3rd\Grafica\Proiecte\spatial-graphic\Project-1\SolarSystemAnimation.cpp(335,21): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+E:\FMI-UniBuc\3rd\Grafica\Proiecte\spatial-graphic\Project-1\SolarSystemAnimation.cpp(35,26): warning C4305: 'initializing': truncation from 'double' to 'float'
+E:\FMI-UniBuc\3rd\Grafica\Proiecte\spatial-graphic\Project-1\SolarSystemAnimation.cpp(52,76): warning C4305: 'initializing': truncation from 'double' to 'float'
+E:\FMI-UniBuc\3rd\Grafica\Proiecte\spatial-graphic\Project-1\SolarSystemAnimation.cpp(219,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+E:\FMI-UniBuc\3rd\Grafica\Proiecte\spatial-graphic\Project-1\SolarSystemAnimation.cpp(357,28): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+E:\FMI-UniBuc\3rd\Grafica\Proiecte\spatial-graphic\Project-1\SolarSystemAnimation.cpp(357,21): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
   Project-1.vcxproj -> E:\FMI-UniBuc\3rd\Grafica\Proiecte\spatial-graphic\x64\Debug\Project-1.exe

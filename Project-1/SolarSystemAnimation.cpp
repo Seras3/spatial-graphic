@@ -24,6 +24,7 @@ VaoId,
 VboId,
 EboId,
 ColorBufferId,
+TextureId,
 ProgramId,
 myMatrixLocation,
 texture;
@@ -99,6 +100,14 @@ void CreateVBO(void)
 		1.0f, 1.0f, 0.0f, 1.0f,
 	};
 
+	static const GLfloat Textures[] =
+	{
+		0.0f, 0.0f, // st jos 
+		0.0f, 1.0f, // dr jos
+		1.0f, 1.0f, // dr sus
+		1.0f, 0.0f, // st sus
+	};
+
 	glGenBuffers(1, &VboId);
 	glBindBuffer(GL_ARRAY_BUFFER, VboId);
 	glBufferData(GL_ARRAY_BUFFER, Vertices.size() * sizeof(GLfloat), Vertices.data(), GL_STATIC_DRAW);
@@ -113,14 +122,22 @@ void CreateVBO(void)
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Colors), Colors, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glGenBuffers(1, &TextureId);
+	glBindBuffer(GL_ARRAY_BUFFER, TextureId);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Textures), Textures, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
 }
 
 void DestroyVBO(void)
 {
+	glDisableVertexAttribArray(2);
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glDeleteBuffers(1, &TextureId);
 	glDeleteBuffers(1, &ColorBufferId);
 	glDeleteBuffers(1, &VboId);
 
@@ -140,7 +157,7 @@ void LoadTexture(void)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	int width, height;
-	unsigned char* image = SOIL_load_image("rocket.png", &width, &height, 0, SOIL_LOAD_RGB);
+	unsigned char* image = SOIL_load_image("rocket-2.png", &width, &height, 0, SOIL_LOAD_RGB);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 	glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -190,6 +207,10 @@ void setMyMatrix(glm::mat4 matrix)
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 }
 
+void setTexCode(int cod) 
+{
+	glUniform1i(glGetUniformLocation(ProgramId, "tex_code"), cod);
+}
 
 
 
@@ -295,7 +316,7 @@ void RenderFunction(void)
 	projection = glm::perspective(fov, GLfloat(width) / GLfloat(height), znear, zfar);
 	glUniformMatrix4fv(glGetUniformLocation(ProgramId, "projection"), 1, GL_FALSE, &projection[0][0]);
 
-
+	setTexCode(0);
 	setMyMatrix(resizeMatrix);
 	glDrawArrays(GL_TRIANGLE_FAN, PlayerVCount, N);
 
@@ -318,6 +339,7 @@ void RenderFunction(void)
 			PLAYER_SHOULD_INIT_MATRIX = false;
 		}
 		setMyMatrix(launchPlayerMatrix);
+		setTexCode(1);
 		glDrawArrays(GL_TRIANGLE_FAN, 0, PlayerVCount);
 	}
 	

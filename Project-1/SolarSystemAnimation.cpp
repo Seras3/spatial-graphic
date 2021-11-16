@@ -95,15 +95,16 @@ void CreateVBO(void)
 		0.0f, 1.0f, 0.0f, 1.0f,
 		0.0f, 0.0f, 1.0f, 1.0f,
 		1.0f, 0.0f, 0.0f, 1.0f,
-		1.0f, 1.0f, 0.0f, 1.0f,
+
+		1.0f, 1.0f, 1.0f, 1.0f,
 	};
 
 	static const GLfloat Textures[] =
 	{
 		0.0f, 0.0f, // st jos 
-		1.0f, 0.0f, // dr jos
+		0.0f, 1.0f, // dr jos
 		1.0f, 1.0f, // dr sus
-		0.0f, 1.0f, // st sus
+		1.0f, 0.0f, // st sus
 	};
 
 	glGenBuffers(1, &VboId);
@@ -203,9 +204,14 @@ void setMyMatrix(glm::mat4 matrix)
 	glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
 }
 
-void setTexCode(int cod) 
+void setTexCode(int code) 
 {
-	glUniform1i(glGetUniformLocation(ProgramId, "tex_code"), cod);
+	glUniform1i(glGetUniformLocation(ProgramId, "tex_code"), code);
+}
+
+void setColCode(int code)
+{
+	glUniform1i(glGetUniformLocation(ProgramId, "col_code"), code);
 }
 
 
@@ -295,6 +301,7 @@ void drawPlanet(int p, float scaleRaport) {
 			Obsx = (rotateMatrix * translMatrix)[3][0];
 			Obsy = (rotateMatrix * translMatrix)[3][1];
 		}
+		setColCode(31);
 		drawMoon();
 	}
 }
@@ -321,17 +328,20 @@ void RenderFunction(void)
 	projection = glm::perspective(fov, GLfloat(width) / GLfloat(height), znear, zfar);
 	glUniformMatrix4fv(glGetUniformLocation(ProgramId, "projection"), 1, GL_FALSE, &projection[0][0]);
 
+	setColCode(0);
 	setTexCode(0);
 	setMyMatrix(resizeMatrix);
 	glDrawArrays(GL_TRIANGLE_FAN, PlayerVCount, N);
 
 	for (int p = 1; p <= 8; p++) {
+		setColCode(-1);
 		drawOrbit(p);
 		rotateMatrix = glm::rotate(glm::mat4(1.0f), planetAngle/p, glm::vec3(0.0, 0.0, 1.0));
 		if (p == 3 && PLAYER_SHOULD_INIT_MATRIX) {
 			rotateVerticalPlayerMatrix = glm::rotate(glm::mat4(1.0f), -planetAngle / p, glm::vec3(0.0, 0.0, 1.0));
 			rotatePlayerMatrix = rotateMatrix;
 		}
+		setColCode(p);
 		drawPlanet(p, planetScaleRaport[p - 1]);
 	}
 
@@ -342,6 +352,7 @@ void RenderFunction(void)
 			PLAYER_SHOULD_INIT_MATRIX = false;
 		}
 		setMyMatrix(launchPlayerMatrix);
+		setColCode(0);
 		setTexCode(1);
 		glDrawArrays(GL_TRIANGLE_FAN, 0, PlayerVCount);
 	}

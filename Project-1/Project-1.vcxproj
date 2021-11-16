@@ -33,6 +33,7 @@
     <None Include="SolarSystemShader.vert" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="rocket-2.png" />
     <Image Include="rocket.png" />
   </ItemGroup>
   <ItemGroup>

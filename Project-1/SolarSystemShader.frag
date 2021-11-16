@@ -22,6 +22,11 @@ void main(void)
 		out_Color = vec4(0.0, 0.0, 0.0, 1.0);
 	}
 
+
+	// Sun
+	if(col_code == 99) {
+		out_Color = mix(ex_Color, vec4(1, 0.5, 0.2, 1.0), 0.7);
+	}
 	
 	// Mercury
 	if(col_code == 1) {    

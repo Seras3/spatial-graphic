@@ -328,7 +328,7 @@ void RenderFunction(void)
 	projection = glm::perspective(fov, GLfloat(width) / GLfloat(height), znear, zfar);
 	glUniformMatrix4fv(glGetUniformLocation(ProgramId, "projection"), 1, GL_FALSE, &projection[0][0]);
 
-	setColCode(0);
+	setColCode(99);
 	setTexCode(0);
 	setMyMatrix(resizeMatrix);
 	glDrawArrays(GL_TRIANGLE_FAN, PlayerVCount, N);

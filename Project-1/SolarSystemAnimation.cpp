@@ -30,14 +30,18 @@ myMatrixLocation,
 texture;
 
 const int PlayerVCount = 4;
+const int StarsVCount = 18;
 const int N = 360;
 const int R = 50;
 const float PI = 3.141516;
 glm::mat4 myMatrix, resizeMatrix, scaleMatrix, translMatrix, rotateMatrix, 
 	translMoonMatrix1, translMoonMatrix2, rotateMoonMatrix,
+	rotateStarMatrix, translStarMatrix, scaleStarMatrix,
 	translPlayerMatrix, rotatePlayerMatrix, rotateVerticalPlayerMatrix, launchPlayerMatrix;
 
 glm::mat4 view, projection;
+
+vector<GLfloat> starXScale, starYScale, starRotation, starXTransl, starYTransl;
 
 float Obsx = 0.0f, Obsy = 0.0f, Obsz = 800.f;
 float Refx = 0.0f, Refy = 0.0f;
@@ -50,6 +54,7 @@ float planetAngle = 0.0;
 float moonAngle = 0.0;
 float planetScaleRaport[] = { 0.25, 0.5, 0.55, 0.3, 0.75, 0.70, 0.60, 0.60 };
 
+bool checkRotatePlanetsAnticlockwise;
 
 vector<GLfloat> getCirclePoints(float r, int numberOfPoints)
 {
@@ -63,6 +68,16 @@ vector<GLfloat> getCirclePoints(float r, int numberOfPoints)
 		circlePoints.insert(circlePoints.end(), { x, y, 0.0f, 1.0f });
 	}
 	return circlePoints;
+}
+
+void generateStars() {
+	for (int i = 0; i <= 1000; i++) {
+		starXScale.push_back((float)rand() / RAND_MAX);
+		starYScale.push_back((float)rand() / RAND_MAX);
+		starRotation.push_back((float)rand() / RAND_MAX);
+		starXTransl.push_back(rand() % 2000 - 1000);
+		starYTransl.push_back(rand() % 2000 - 1000);
+	}
 }
 
 void debugMatrix(glm::mat4 matrix)
@@ -79,6 +94,32 @@ void debugMatrix(glm::mat4 matrix)
 void CreateVBO(void)
 {
 	static vector<GLfloat> Vertices = {
+		// Star vertices
+		4.5f, 0.0f, 0.0f, 1.0f,
+		3.0f, 3.0f, 0.0f, 1.0f,
+		6.0f, 3.0f, 0.0f, 1.0f,
+
+		6.0f, 3.0f, 0.0f, 1.0f,
+		9.0f, 4.5f, 0.0f, 1.0f,
+		6.0f, 6.0f, 0.0f, 1.0f,
+
+		6.0f, 6.0f, 0.0f, 1.0f,
+		4.5f, 9.0f, 0.0f, 1.0f,
+		3.0f, 6.0f, 0.0f, 1.0f,
+
+		3.0f, 6.0f, 0.0f, 1.0f,
+		6.0f, 6.0f, 0.0f, 1.0f,
+		6.0f, 3.0f, 0.0f, 1.0f,
+
+		3.0f, 6.0f, 0.0f, 1.0f,
+		6.0f, 3.0f, 0.0f, 1.0f,
+		3.0f, 3.0f, 0.0f, 1.0f,
+
+		3.0f, 6.0f, 0.0f, 1.0f,
+		3.0f, 3.0f, 0.0f, 1.0f,
+		0.0f, 4.5f, 0.0f, 1.0f,
+
+		// Spaceship vertices
 		-25.f, -25.0f, 0.0f, 1.0f,
 		 25.f, -25.0f, 0.0f, 1.0f,
 		 25.f, 25.0f, 0.0f, 1.0f,
@@ -91,6 +132,27 @@ void CreateVBO(void)
 
 	static const GLfloat Colors[] =
 	{
+		// Star
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+
+		// Spaceship
 		1.0f, 0.0f, 0.0f, 1.0f,
 		0.0f, 1.0f, 0.0f, 1.0f,
 		0.0f, 0.0f, 1.0f, 1.0f,
@@ -101,10 +163,10 @@ void CreateVBO(void)
 
 	static const GLfloat Textures[] =
 	{
-		0.0f, 0.0f, // st jos 
-		0.0f, 1.0f, // dr jos
-		1.0f, 1.0f, // dr sus
-		1.0f, 0.0f, // st sus
+		0.0f, 0.0f, 
+		0.0f, 1.0f, 
+		1.0f, 1.0f, 
+		1.0f, 0.0f, 
 	};
 
 	glGenBuffers(1, &VboId);
@@ -174,9 +236,16 @@ void DestroyShaders(void)
 	glDeleteProgram(ProgramId);
 }
 
+
+void Cleanup(void)
+{
+	DestroyShaders();
+	DestroyVBO();
+}
+
 void Initialize(void)
 {
-	glClearColor(0.0f, 0.0f, 0.8f, 0.0f);
+	glClearColor(0.0f, 0.0f, 0.3f, 0.0f);
 	CreateVBO();
 	CreateShaders();
 
@@ -191,12 +260,8 @@ void Initialize(void)
 
 	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
 	resizeMatrix = glm::mat4(1.0f);
-}
 
-void Cleanup(void)
-{
-	DestroyShaders();
-	DestroyVBO();
+	generateStars();
 }
 
 void setMyMatrix(glm::mat4 matrix)
@@ -215,21 +280,38 @@ void setColCode(int code)
 	glUniform1i(glGetUniformLocation(ProgramId, "col_code"), code);
 }
 
-
-void rotatePlanetsAroundSun(int n)
+void rotatePlanetsAnticlockwise(int n)
 {
 	moonAngle = moonAngle +0.35;
 	planetAngle = planetAngle + 0.1;
 	glutPostRedisplay();
-	glutTimerFunc(50, rotatePlanetsAroundSun, 0);
+	if(checkRotatePlanetsAnticlockwise)
+		glutTimerFunc(50, rotatePlanetsAnticlockwise, 0);
+}
+
+void rotatePlanetsClockwise(int n)
+{
+	moonAngle = moonAngle - 0.35;
+	planetAngle = planetAngle - 0.1;
+	glutPostRedisplay();
+	if (!checkRotatePlanetsAnticlockwise)
+		glutTimerFunc(50, rotatePlanetsClockwise, 0);
 }
 
 void mouse(int button, int state, int x, int y)
 {
 	switch (button) {
 	case GLUT_RIGHT_BUTTON:
-		if (state == GLUT_DOWN)
-			glutTimerFunc(100, rotatePlanetsAroundSun, 0);
+		if (state == GLUT_DOWN) {
+			checkRotatePlanetsAnticlockwise = true;
+			glutTimerFunc(100, rotatePlanetsAnticlockwise, 0);
+		}
+		break;
+	 case GLUT_LEFT_BUTTON:
+		 if (state == GLUT_DOWN) {
+			 checkRotatePlanetsAnticlockwise = false;
+			 glutTimerFunc(100, rotatePlanetsClockwise, 0);
+		 }
 		break;
 	default:
 		break;
@@ -277,7 +359,7 @@ void processSpecialKeys(int key, int x, int y) {
 void drawOrbit(int p) {
 	scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(2.f * p, 2.f * p, 1.0));
 	setMyMatrix(scaleMatrix);
-	glDrawArrays(GL_LINE_LOOP, PlayerVCount, N);
+	glDrawArrays(GL_LINE_LOOP, StarsVCount + PlayerVCount, N);
 }
 
 void drawMoon() {
@@ -288,14 +370,14 @@ void drawMoon() {
 	translMoonMatrix2 = glm::translate(glm::mat4(1.0f), glm::vec3(6* R, 0.0, 0.0));
 
 	setMyMatrix(rotateMatrix * translMoonMatrix2 * rotateMoonMatrix * translMoonMatrix1 * translMatrix * scaleMatrix);
-	glDrawArrays(GL_TRIANGLE_FAN, PlayerVCount, N);
+	glDrawArrays(GL_TRIANGLE_FAN, StarsVCount + PlayerVCount, N);
 }
 
 void drawPlanet(int p, float scaleRaport) {
 	scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(scaleRaport, scaleRaport, 1.0));
 	translMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(2 * p * R, 0.0, 0.0));
 	setMyMatrix(rotateMatrix * translMatrix * scaleMatrix);
-	glDrawArrays(GL_TRIANGLE_FAN, PlayerVCount, N);
+	glDrawArrays(GL_TRIANGLE_FAN, StarsVCount + PlayerVCount, N);
 	if (p == 3) {
 		if (!PLAYER_LAUNCHED) {
 			translPlayerMatrix = translMatrix;
@@ -304,6 +386,16 @@ void drawPlanet(int p, float scaleRaport) {
 		}
 		setColCode(31);
 		drawMoon();
+	}
+}
+
+void drawStars() {
+	for (int i = 0; i <= 1000; i++) {
+		scaleStarMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(starXScale[i], starYScale[i], 1.0));
+		translStarMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(starXTransl[i], starYTransl[i], 0.0));
+		rotateStarMatrix = glm::rotate(glm::mat4(1.0f), starRotation[i], glm::vec3(0.0, 0.0, 1.0));
+		setMyMatrix(rotateStarMatrix * translStarMatrix * scaleStarMatrix);
+		glDrawArrays(GL_TRIANGLES, 0, StarsVCount);
 	}
 }
 
@@ -330,8 +422,11 @@ void RenderFunction(void)
 
 	setColCode(99);
 	setTexCode(0);
+	
+	drawStars();
+
 	setMyMatrix(resizeMatrix);
-	glDrawArrays(GL_TRIANGLE_FAN, PlayerVCount, N);
+	glDrawArrays(GL_TRIANGLE_FAN, StarsVCount + PlayerVCount, N);
 
 	for (int p = 1; p <= 8; p++) {
 		setColCode(-1);
@@ -354,7 +449,7 @@ void RenderFunction(void)
 		setMyMatrix(launchPlayerMatrix);
 		setColCode(0);
 		setTexCode(1);
-		glDrawArrays(GL_TRIANGLE_FAN, 0, PlayerVCount);
+		glDrawArrays(GL_TRIANGLE_FAN, StarsVCount, PlayerVCount);
 	}
 	
 	glFlush();

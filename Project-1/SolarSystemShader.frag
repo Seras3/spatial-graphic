@@ -19,7 +19,7 @@ void main(void)
 	}
 
 	if(col_code == -1) {
-		out_Color = vec4(0.0, 0.0, 0.0, 1.0);
+		out_Color = vec4(0.25, 0.25, 0.25, 1.0);
 	}
 
 

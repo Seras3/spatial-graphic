@@ -15,7 +15,10 @@ void main(void)
 	out_Color = ex_Color;
 	
 	if(tex_code == 1) {
-		out_Color = texture(myTexture, tex_Coord);
+		vec4 texColor =  texture(myTexture, tex_Coord);
+		if(texColor.x == 0 && texColor.y == 0 && texColor.z == 0)
+			discard;
+		out_Color = texColor;
 	}
 
 	if(col_code == -1) {

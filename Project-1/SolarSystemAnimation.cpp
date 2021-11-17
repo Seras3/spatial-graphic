@@ -12,7 +12,7 @@
 #include "glm/glm/gtc/matrix_transform.hpp"
 #include "glm/glm/gtx/transform.hpp"
 #include "glm/glm/gtc/type_ptr.hpp"
-#include "SOIL.h"
+#include "stb_image.h"
 
 #include <vector>
 using namespace std;
@@ -163,32 +163,51 @@ void CreateVBO(void)
 
 	static const GLfloat Textures[] =
 	{
+		.0f, .0f, 
+		.0f, .0f, 
+		.0f, .0f, 
+		.0f, .0f, 
+		.0f, .0f, 
+		.0f, .0f, 
+		.0f, .0f, 
+		.0f, .0f, 
+		.0f, .0f, 
+		.0f, .0f, 
+		.0f, .0f, 
+		.0f, .0f, 
+		.0f, .0f, 
+		.0f, .0f, 
+		.0f, .0f, 
+		.0f, .0f, 
+		.0f, .0f, 
+		.0f, .0f, 
+
 		0.0f, 0.0f, 
-		0.0f, 1.0f, 
-		1.0f, 1.0f, 
 		1.0f, 0.0f, 
+		1.0f, 1.0f, 
+		0.0f, 1.0f, 
 	};
+
+	glGenVertexArrays(1, &VaoId);
+	glBindVertexArray(VaoId);
 
 	glGenBuffers(1, &VboId);
 	glBindBuffer(GL_ARRAY_BUFFER, VboId);
 	glBufferData(GL_ARRAY_BUFFER, Vertices.size() * sizeof(GLfloat), Vertices.data(), GL_STATIC_DRAW);
-
-	glGenVertexArrays(1, &VaoId);
-	glBindVertexArray(VaoId);
-	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(0);
 
 	glGenBuffers(1, &ColorBufferId);
 	glBindBuffer(GL_ARRAY_BUFFER, ColorBufferId);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Colors), Colors, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(1);
 
 	glGenBuffers(1, &TextureId);
 	glBindBuffer(GL_ARRAY_BUFFER, TextureId);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Textures), Textures, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(2);
 }
 
 void DestroyVBO(void)
@@ -197,12 +216,14 @@ void DestroyVBO(void)
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, TextureId);
 	glDeleteBuffers(1, &TextureId);
+	glBindBuffer(GL_ARRAY_BUFFER, ColorBufferId);
 	glDeleteBuffers(1, &ColorBufferId);
+	glBindBuffer(GL_ARRAY_BUFFER, VboId);
 	glDeleteBuffers(1, &VboId);
 
-	glBindVertexArray(0);
+	glBindVertexArray(VaoId);
 	glDeleteVertexArrays(1, &VaoId);
 }
 
@@ -211,18 +232,19 @@ void LoadTexture(void)
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	stbi_set_flip_vertically_on_load(true);
 	int width, height;
-	unsigned char* image = SOIL_load_image("rocket-2.png", &width, &height, 0, SOIL_LOAD_RGB);
+	unsigned char* image = stbi_load("resize_rocket.png", &width, &height, 0, 3);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 	glGenerateMipmap(GL_TEXTURE_2D);
 
-	SOIL_free_image_data(image);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	stbi_image_free(image);
+	glBindTexture(GL_TEXTURE_2D, texture);
 }
 
 void CreateShaders(void)

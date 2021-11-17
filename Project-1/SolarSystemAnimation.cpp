@@ -37,7 +37,7 @@ const float PI = 3.141516;
 glm::mat4 myMatrix, resizeMatrix, scaleMatrix, translMatrix, rotateMatrix, 
 	translMoonMatrix1, translMoonMatrix2, rotateMoonMatrix,
 	rotateStarMatrix, translStarMatrix, scaleStarMatrix,
-	translPlayerMatrix, rotatePlayerMatrix, rotateVerticalPlayerMatrix, launchPlayerMatrix;
+	translPlayerMatrix, rotatePlayerMatrix, rotateVerticalPlayerMatrix, launchPlayerMatrix, launchPlayerMatrixTransl;
 
 glm::mat4 view, projection;
 
@@ -359,19 +359,23 @@ void processSpecialKeys(int key, int x, int y) {
 	switch (key) {
 	case GLUT_KEY_LEFT:
 		Obsx -= 10;
-		launchPlayerMatrix = glm::translate(launchPlayerMatrix, glm::vec3(-10, 0, 0));
+		launchPlayerMatrixTransl = glm::translate(launchPlayerMatrixTransl, glm::vec3(-10, 0, 0));
+		launchPlayerMatrix = launchPlayerMatrixTransl*glm::rotate(PI/2, glm::vec3(0.0f, 0.0f, 0.1f));
 		break;
 	case GLUT_KEY_RIGHT:
 		Obsx += 10;
-		launchPlayerMatrix = glm::translate(launchPlayerMatrix, glm::vec3(10, 0, 0));
+		launchPlayerMatrixTransl = glm::translate(launchPlayerMatrixTransl, glm::vec3(10, 0, 0));
+		launchPlayerMatrix = launchPlayerMatrixTransl *glm::rotate(-PI / 2, glm::vec3(0.0f, 0.0f, 0.1f));
 		break;
 	case GLUT_KEY_UP:
 		Obsy += 10;
-		launchPlayerMatrix = glm::translate(launchPlayerMatrix, glm::vec3(0, 10, 0));
+		launchPlayerMatrixTransl = glm::translate(launchPlayerMatrixTransl, glm::vec3(0, 10, 0));
+		launchPlayerMatrix = launchPlayerMatrixTransl;
 		break;
 	case GLUT_KEY_DOWN:
 		Obsy -= 10;
-		launchPlayerMatrix = glm::translate(launchPlayerMatrix, glm::vec3(0, -10, 0));
+		launchPlayerMatrixTransl = glm::translate(launchPlayerMatrixTransl, glm::vec3(0, -10, 0));
+		launchPlayerMatrix = launchPlayerMatrixTransl * glm::rotate(PI, glm::vec3(0.0f, 0.0f, 0.1f));
 		break;
 	default:
 		break;
@@ -466,6 +470,7 @@ void RenderFunction(void)
 	{
 		if (PLAYER_SHOULD_INIT_MATRIX) {
 			launchPlayerMatrix = rotatePlayerMatrix * translPlayerMatrix * rotateVerticalPlayerMatrix;
+			launchPlayerMatrixTransl = launchPlayerMatrix;
 			PLAYER_SHOULD_INIT_MATRIX = false;
 		}
 		setMyMatrix(launchPlayerMatrix);

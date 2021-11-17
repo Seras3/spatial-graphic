@@ -15,6 +15,6 @@ E:\FMI-UniBuc\3rd\Grafica\Proiecte\spatial-graphic\Project-1\SolarSystemAnimatio
 E:\FMI-UniBuc\3rd\Grafica\Proiecte\spatial-graphic\Project-1\SolarSystemAnimation.cpp(308,28): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
 E:\FMI-UniBuc\3rd\Grafica\Proiecte\spatial-graphic\Project-1\SolarSystemAnimation.cpp(316,24): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
 E:\FMI-UniBuc\3rd\Grafica\Proiecte\spatial-graphic\Project-1\SolarSystemAnimation.cpp(317,28): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-E:\FMI-UniBuc\3rd\Grafica\Proiecte\spatial-graphic\Project-1\SolarSystemAnimation.cpp(486,28): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-E:\FMI-UniBuc\3rd\Grafica\Proiecte\spatial-graphic\Project-1\SolarSystemAnimation.cpp(486,21): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+E:\FMI-UniBuc\3rd\Grafica\Proiecte\spatial-graphic\Project-1\SolarSystemAnimation.cpp(491,28): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+E:\FMI-UniBuc\3rd\Grafica\Proiecte\spatial-graphic\Project-1\SolarSystemAnimation.cpp(491,21): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
   Project-1.vcxproj -> E:\FMI-UniBuc\3rd\Grafica\Proiecte\spatial-graphic\x64\Debug\Project-1.exe

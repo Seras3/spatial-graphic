@@ -177,6 +177,7 @@ void DestroyShaders(void)
 void Initialize(void)
 {
 	glClearColor(0.0f, 0.0f, 0.8f, 0.0f);
+	CreateVBO();
 	CreateShaders();
 
 	LoadTexture();
@@ -309,7 +310,6 @@ void drawPlanet(int p, float scaleRaport) {
 void RenderFunction(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT);
-	CreateVBO();
 
 	// se schimba pozitia observatorului
 	glm::vec3 Obs = glm::vec3(Obsx, Obsy, Obsz);

@@ -43,7 +43,7 @@ glm::mat4 view, projection;
 
 vector<GLfloat> starXScale, starYScale, starRotation, starXTransl, starYTransl;
 
-float Obsx = 0.0f, Obsy = 0.0f, Obsz = 800.f;
+float Obsx = 0.0f, Obsy = 0.0f, Obsz = 200.f;
 float Refx = 0.0f, Refy = 0.0f;
 float width = 1200, height = 600, fov = 90, znear = 1, zfar = 1000;
 
@@ -275,10 +275,6 @@ void Initialize(void)
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glUniform1i(glGetUniformLocation(ProgramId, "myTexture"), 0);
-
-	Obsx = 0;
-	Obsy = 0;
-	Obsz = 200.f;
 
 	myMatrixLocation = glGetUniformLocation(ProgramId, "myMatrix");
 	resizeMatrix = glm::mat4(1.0f);
